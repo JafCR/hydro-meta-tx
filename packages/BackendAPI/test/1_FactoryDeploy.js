@@ -27,7 +27,7 @@ contract('Deployment Test', async accounts => {
 
   before(async () => {
     SWTemplate = await SmartWallet.new()
-    console.log('Smart Wallet Template Address: ', SWTemplate.address)
+    console.log('Smart Wallet Template Addres: ', SWTemplate.address)
   })
 
   it('01. Deploy RelayRegistry', async () => {

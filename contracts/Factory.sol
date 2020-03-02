@@ -207,7 +207,10 @@ contract Factory {
      * @param owner Signer address
      */
     function getCreate2Address(address owner) public view returns (address) {
-        bytes32 temp = keccak256(abi.encodePacked(bytes1(0xff), address(this), uint(owner), bytes32(keccak256(type(Proxy).creationCode))));
+        bytes memory code = type(Proxy).creationCode;
+        code = abi.encodePacked(code,abi.encode(swTemplate));
+
+        bytes32 temp = keccak256(abi.encodePacked(bytes1(0xff), address(this), uint(owner), bytes32(keccak256(code))));
         address ret;
         uint mask = 2 ** 160 - 1;
         assembly {

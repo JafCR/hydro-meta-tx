@@ -4,6 +4,8 @@ var RelayRegistry = artifacts.require('RelayRegistry')
 var Factory = artifacts.require('Factory')
 var SmartWallet = artifacts.require('SmartWallet')
 var TestERC20 = artifacts.require('TestERC20')
+var Proxy = artifacts.require('Proxy')
+const eth = require('ethereumjs-util')
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
@@ -47,9 +49,18 @@ contract('Deployment Test', async accounts => {
   })
 
   it('03. Deploy Wallet', async () => {
+    let predictedAddress = await factoryInstance.getCreate2Address(
+      accounts[0],
+      {
+        from: accounts[0],
+      },
+    )
     let tx = await factoryInstance.deployWallet()
     let walletAddress = tx.logs[0].args.addr
-    console.log('Wallet Address: ', walletAddress)
+    console.log('Wallet    Address: ', walletAddress)
+    console.log('Predicted Address: ', predictedAddress)
+
+    expect(walletAddress).to.be.equal(predictedAddress)
 
     let instance = await SmartWallet.at(walletAddress)
 
@@ -70,10 +81,7 @@ contract('Deployment Test', async accounts => {
   })
 
   it('04. Deploy ERC20 Token', async () => {
-      
     let tokenInstance = await TestERC20.new()
     console.log('Token Address:', tokenInstance.address)
-
-
-})
+  })
 })

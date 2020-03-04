@@ -7,7 +7,7 @@ ethers.errors.setLogLevel('error')
 export default class Metacash {
   options: any = {
     version: '2.0.0',
-    relay: 'https://v2.relay.lamarkaz.com',
+    relay: 'http://localhost:4000',
     factory: '0xBcC1F7a800e77F59E64Fd39F6Fd96FE89d31581B',
     provider: 'ropsten',
     InfuraAccessToken: '500f69b524a04c1b8eddc8c43b31541f',

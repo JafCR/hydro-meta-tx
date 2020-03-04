@@ -56,11 +56,13 @@ describe('Test', async function(accounts) {
       keyString.toString(),
       'test test test',
     )
+    let provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+    wallet = wallet.connect(provider)
+    
     let request = await w.transfer({ token, decimals, to, value, wallet })
     console.log('Request: ', request)
     let r = request
 
-    let provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
     const factoryAbi = [
       'function deployWallet(uint fee, address token, address to, uint value, uint8 v, bytes32 r, bytes32 s) returns (address)',
       'function canDeploy(address owner) view returns (bool inexistent)',
@@ -76,6 +78,8 @@ describe('Test', async function(accounts) {
     )
     console.log(provider)
     txWallet = txWallet.connect(provider)
+    console.log(txWallet.privateKey)
+    return true
     // let balance = await txWallet.getBalance()
     let balance = await provider.getBalance(txWallet.address)
 

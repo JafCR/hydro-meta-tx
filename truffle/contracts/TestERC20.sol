@@ -9,7 +9,7 @@ contract TestERC20 is ERC20,ERC20Detailed,ERC20Mintable
 {
 
     constructor() public 
-    ERC20Detailed("Name", "Symbol",8) {
+    ERC20Detailed("Name", "Symbol",1) {
 
     }
 

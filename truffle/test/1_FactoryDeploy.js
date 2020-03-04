@@ -21,6 +21,7 @@ var relayInstance
 var factoryInstance
 var walletInstance
 var SWTemplate
+var predictedAddress
 
 contract('Deployment Test', async accounts => {
   relayAccount = accounts[9]
@@ -49,12 +50,9 @@ contract('Deployment Test', async accounts => {
   })
 
   it('03. Deploy Wallet', async () => {
-    let predictedAddress = await factoryInstance.getCreate2Address(
-      accounts[0],
-      {
-        from: accounts[0],
-      },
-    )
+    predictedAddress = await factoryInstance.getCreate2Address(accounts[0], {
+      from: accounts[0],
+    })
     let tx = await factoryInstance.deployWallet()
     let walletAddress = tx.logs[0].args.addr
     console.log('Wallet    Address: ', walletAddress)
@@ -81,7 +79,12 @@ contract('Deployment Test', async accounts => {
   })
 
   it('04. Deploy ERC20 Token', async () => {
+    predictedAddress = '0xc9244cAD90ab623e13c0FA746F43f06F44b5221F'
     let tokenInstance = await TestERC20.new()
     console.log('Token Address:', tokenInstance.address)
+    await tokenInstance.mint(predictedAddress, 100000)
+
+    let balance = await tokenInstance.balanceOf(predictedAddress)
+    console.log('Balance: ', balance.toNumber())
   })
 })

@@ -1,7 +1,32 @@
 {
-  "name": "root",
-  "private": true,
-  "devDependencies": {
-    "lerna": "^3.19.0"
+  "name": "meta-tx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robertmagier/meta-tx.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/robertmagier/meta-tx/issues"
+  },
+  "homepage": "https://github.com/robertmagier/meta-tx#readme",
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "ethereumjs-util": "^6.2.0",
+    "ethers": "^4.0.45",
+    "lerna": "^3.20.2",
+    "openzeppelin-solidity": "^2.5.0",
+    "sleep": "^6.1.0"
   }
 }

@@ -52,22 +52,41 @@ contract('Deployment Test', async accounts => {
     // Check if relay registry is correct.
     let rrAddress = await factoryInstance.registry()
     expect(rrAddress).to.be.equal(rrInstance.address)
-    // Create Metacash instance.
-    metacash = new Metacash.default({
-      factory: factoryInstance.address,
-    })
   })
 
   it('03. Add Relayer to Relayer Registry', async () => {
     keyString = await fs.readFileSync('./test/keystringRelayer')
+    let keystore = JSON.parse(keyString.toString())
+    let adr = '0x' + keystore.address
+    console.log('   Relayer Address: ', ethers.utils.getAddress(adr))
+
+    // Create Metacash instance.
+    metacash = new Metacash.default({
+      factory: factoryInstance.address,
+      relayer: adr,
+    })
+
     walletRelayer = await metacash.decryptWallet(
       keyString.toString(),
       'test test test',
     )
+
     await rrInstance.triggerRelay(walletRelayer.address, true)
     let accepted = await rrInstance.relays(walletRelayer.address)
     expect(accepted).to.be.true
-    console.log('   Relayer Adddress: ', walletRelayer.address)
+    console.log('   Relayer Address: ', walletRelayer.address)
+    console.log('   Private Key: ', walletRelayer.privateKey)
+
+    let wei = web3.utils.toWei('1', 'ether').toString()
+    console.log('Wei:', wei)
+    await web3.eth.sendTransaction({
+      from: accounts[4],
+      to: walletRelayer.address,
+      value: wei,
+    })
+
+    let balance = await web3.eth.getBalance(walletRelayer.address)
+    console.log('Balance Relayuer: ', balance)
   })
 
   it('04. Create user wallet and generate Smart Wallet address', async () => {

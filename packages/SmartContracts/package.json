@@ -27,6 +27,7 @@
     "ethers": "^4.0.45",
     "lerna": "^3.20.2",
     "openzeppelin-solidity": "^2.5.0",
-    "sleep": "^6.1.0"
+    "sleep": "^6.1.0",
+    "truffle": "^5.1.15"
   }
 }

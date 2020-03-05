@@ -6,7 +6,7 @@ var SmartWallet = artifacts.require('SmartWallet')
 var TestERC20 = artifacts.require('TestERC20')
 var Proxy = artifacts.require('Proxy')
 const eth = require('ethereumjs-util')
-const Metacash = require('../../JsMetacash/lib/index.js')
+const Metacash = require('../../BackendAPI/lib/index.js')
 const fs = require('fs')
 const ethers = require('ethers')
 

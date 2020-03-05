@@ -7,7 +7,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
     "build": "tsc",
-    "test": "tsc && mocha",
+    "test": "echo No test",
     "version": "tsc -v"
   },
   "repository": {
@@ -40,6 +40,7 @@
     "ethers": "^4.0.27",
     "express": "^4.17.1",
     "ganache-cli": "^6.9.1",
-    "sleep": "^6.1.0"
+    "sleep": "^6.1.0",
+    "truffle": "^5.1.15"
   }
 }

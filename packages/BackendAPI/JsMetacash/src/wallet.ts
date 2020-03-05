@@ -28,6 +28,7 @@ export default class Wallet {
   provider: ethers.providers.Provider
   smartWallet: ethers.Contract | undefined
   tokenAbi: any
+  relayer: string
 
   constructor(keystore: any, opts: object) {
     this.options = opts
@@ -48,6 +49,7 @@ export default class Wallet {
       timeout: 30000,
     })
     this.tokenAbi = new ethers.utils.Interface(tokenAbi).abi
+    this.relayer = this.options.relayer
   }
 
   async queryCreate2Address() {
@@ -79,9 +81,12 @@ export default class Wallet {
     value: string
     wallet: ethers.Wallet
   }): Promise<any> {
-    // token = token.toUpperCase()
     await this.queryCreate2Address()
+
+    // Get current block number and calculate deadline block.
     let blockNumber = await wallet.provider.getBlockNumber()
+    let deadline = blockNumber + 10
+
     console.log('Block number:', blockNumber)
     let gaspriceInWei
     try {
@@ -94,31 +99,48 @@ export default class Wallet {
       throw e
     }
 
+    let relayer = this.options.relayer
+    let factory = this.options.factory
     let request: any = {
       token,
       gasprice: gaspriceInWei.toString(),
       to,
       value,
       fee,
+      deadline,
+      relayer,
+      factory,
     }
 
+    console.log('Factory: ', factory)
     if (await this.canDeploy()) {
       const hash = ethers.utils.solidityKeccak256(
-        ['string', 'address', 'address','address', 'uint', 'uint', 'uint', 'uint', 'uint'],
         [
-          "deployWalletPay",
-          this.options.relayAddress
-          fee,
-          token,
+          'string',
+          'address',
+          'address',
+          'address',
+          'uint',
+          'uint',
+          'uint',
+          'uint',
+        ],
+        [
+          'deployWalletPay',
+          this.options.relayer,
+          request.token,
           request.to,
+          request.gasprice,
+          request.fee,
           request.value,
-
+          request.deadline,
         ],
       )
       console.log('1')
       const sig = await wallet.signMessage(ethers.utils.arrayify(hash))
       request.sig = sig
-      return await this.relayAPI.post('/deploySend', request)
+
+      return this.relayAPI.post('/deploySend', request)
     } else {
       request.nonce = ethers.utils
         .bigNumberify(

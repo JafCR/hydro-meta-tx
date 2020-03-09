@@ -34,8 +34,12 @@ let token = tokenInstance.address
 let decimals = 0
 
 let response = await clientSmartWallet.transfer({ token, decimals, to, value })
+
+
 ```
-__HydroTxAPI.constructor(options)__
+
+
+`HydroTxAPI.constructor(options)`
 
 Creates HydroTxAPI instance. This object allows to create and import existing instances of ethers wallet and SmartWallet
 Following options are required:

@@ -10,7 +10,7 @@ import "./IERC20.sol";
 contract SmartWallet {
 
     event Upgrade(address indexed newImplementation);
-
+    event Paid(address from, address to, address tokenContract, uint value,uint fee);
     /**
      * @dev Shared key value store. Data should be encoded and decoded using abi.encode()/abi.decode() by different functions. No data is actually stored in SmartWallet, instead everything is stored in the Proxy contract's context.
      */
@@ -82,11 +82,14 @@ contract SmartWallet {
     function pay(address to, uint value, uint fee, address tokenContract, uint deadline, uint8 v, bytes32 r, bytes32 s) onlyRelay public returns (bool) {
         uint currentNonce = abi.decode(store["nonce"], (uint));
         require(block.number <= deadline);
-        require(abi.decode(store["owner"], (address)) == recover(keccak256(abi.encodePacked("pay", msg.sender, to, tokenContract, value, fee, tx.gasprice, currentNonce, deadline)), v, r, s));
+        address signer = recover(keccak256(abi.encodePacked("pay", msg.sender, to, tokenContract, value, fee, tx.gasprice, currentNonce, deadline)), v, r, s);
+        // emit Paid(signer,signer,msg.sender,currentNonce,fee);
+        require(abi.decode(store["owner"], (address)) == signer,"Wrong signer");
         IERC20 token = IERC20(tokenContract);
         store["nonce"] = abi.encode(currentNonce+1);
         token.transfer(to, value);
         token.transfer(msg.sender, fee);
+        emit Paid(signer,to,tokenContract,value,fee);
         return true;
     }
     
@@ -287,7 +290,7 @@ contract SmartWallet {
      * @param messageHash Original hash
      */
     function recover(bytes32 messageHash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
-        bytes memory prefix = "\x19Metacash Signed Message:\n32";
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 prefixedMessageHash = keccak256(abi.encodePacked(prefix, messageHash));
         return ecrecover(prefixedMessageHash, v, r, s);
     }

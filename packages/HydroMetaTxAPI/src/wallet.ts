@@ -20,52 +20,68 @@ const smartWalletAbi = require('./ABI/SmartWallet')
 
 export default class Wallet {
   relayAPI: AxiosInstance
+  address:any
   options: any
   keystore: any
-  signer: string
-  walletAddress: string | undefined
-  factory: ethers.Contract
+  signer: any
+  smartWalletAddress: string | undefined
+  factoryContract: ethers.Contract
+  factoryAddress: any
   provider: ethers.providers.Provider
-  smartWallet: ethers.Contract | undefined
+  smartWalletContract: ethers.Contract | undefined
+  ethersWallet:ethers.Wallet
   tokenAbi: any
-  relayer: string
+  relayerAddress: string
+  fee: any
+  gasprice: any
 
-  constructor(keystore: any, opts: object) {
+  constructor(_keystore: string,password:string, opts: object) {
     this.options = opts
-    this.keystore =
-      typeof keystore === 'string' ? JSON.parse(keystore) : keystore
-    this.signer = ethers.utils.getAddress('0x' + this.keystore.address)
+    this.keystore = _keystore
+      // typeof _keystore === 'string' ? JSON.parse(_keystore) : _keystore
     // this.provider = ethers.getDefaultProvider(this.options.provider)
-    this.provider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:8545',
-    )
-    this.factory = new ethers.Contract(
-      this.options.factory,
-      factoryAbi,
-      this.provider,
-    )
+    this.fee = this.options.fee
+    this.gasprice = this.options.gasprice
+    this.factoryAddress = this.options.factoryAddress
     this.relayAPI = axios.create({
-      baseURL: this.options.relay,
+      baseURL: this.options.relayHost,
       timeout: 30000,
     })
-    this.tokenAbi = new ethers.utils.Interface(tokenAbi).abi
-    this.relayer = this.options.relayer
+
   }
 
+  async init(password:string) {
+
+    this.ethersWallet = await ethers.Wallet.fromEncryptedJson(this.keystore,password)
+    this.signer = ethers.utils.getAddress(this.ethersWallet.address)
+    this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress)
+    this.ethersWallet = this.ethersWallet.connect(this.provider!)
+    this.address = this.ethersWallet.address
+    await this.getRelayer()
+
+    this.factoryContract = new ethers.Contract(
+      this.factoryAddress!,
+      factoryAbi,
+      this.ethersWallet,
+    )
+
+  }
+
+
   async queryCreate2Address() {
-    console.log('   Signer: ', this.signer)
-    if (typeof this.walletAddress === 'string') return this.walletAddress
-    this.walletAddress = await this.factory.getCreate2Address(this.signer)
-    this.smartWallet = new ethers.Contract(
-      this.walletAddress!,
+    if (typeof this.smartWalletAddress === 'string') return this.smartWalletAddress
+    this.smartWalletAddress = await this.factoryContract.getCreate2Address(this.signer)
+
+    this.smartWalletContract = new ethers.Contract(
+      this.smartWalletAddress!,
       smartWalletAbi,
       this.provider,
     )
-    return this.walletAddress
+    return this.smartWalletAddress
   }
 
   canDeploy() {
-    return this.factory.canDeploy(this.signer)
+    return this.factoryContract.canDeploy(this.signer)
   }
 
   async transfer({
@@ -73,7 +89,6 @@ export default class Wallet {
     decimals,
     to,
     value,
-    wallet,
   }: {
     token: string
     decimals: number
@@ -84,35 +99,32 @@ export default class Wallet {
     await this.queryCreate2Address()
 
     // Get current block number and calculate deadline block.
-    let blockNumber = await wallet.provider.getBlockNumber()
+    let blockNumber = await this.provider.getBlockNumber()
     let deadline = blockNumber + 10
 
-    console.log('Block number:', blockNumber)
     let gaspriceInWei
     try {
-      //   var { gwei: gasprice, fee } = await this.calculateFee(wallet, token, to)
-      var gasprice = '10'
-      var fee = '100'
-      fee = new BigNumber(fee).shiftedBy(decimals).toFixed()
-      gaspriceInWei = ethers.utils.parseUnits(String(gasprice), 'gwei')
+      var txFee
+      txFee = new BigNumber(this.fee).shiftedBy(decimals).toFixed()
+      gaspriceInWei = ethers.utils.parseUnits(String(this.gasprice), 'gwei')
     } catch (e) {
       throw e
     }
 
-    let relayer = this.options.relayer
-    let factory = this.options.factory
+    let relayer = this.relayerAddress
+    let factory = this.factoryAddress
+    
     let request: any = {
       token,
       gasprice: gaspriceInWei.toString(),
       to,
       value,
-      fee,
+      fee: txFee,
       deadline,
       relayer,
       factory,
     }
 
-    console.log('Factory: ', factory)
     if (await this.canDeploy()) {
       const hash = ethers.utils.solidityKeccak256(
         [
@@ -127,7 +139,7 @@ export default class Wallet {
         ],
         [
           'deployWalletPay',
-          this.options.relayer,
+          this.relayerAddress,
           request.token,
           request.to,
           request.gasprice,
@@ -137,14 +149,15 @@ export default class Wallet {
         ],
       )
       console.log('1')
-      const sig = await wallet.signMessage(ethers.utils.arrayify(hash))
+      const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
       request.sig = sig
 
       return this.relayAPI.post('/deploySend', request)
     } else {
+      request.smartWallet = this.smartWalletAddress
       request.nonce = ethers.utils
         .bigNumberify(
-          await this.smartWallet!.store(
+          await this.smartWalletContract!.store(
             ethers.utils.formatBytes32String('nonce'),
           ),
         )
@@ -152,7 +165,7 @@ export default class Wallet {
 
       var hash = ethers.utils.solidityKeccak256(
         [
-          'address',
+          'string',
           'address',
           'address',
           'address',
@@ -160,27 +173,35 @@ export default class Wallet {
           'uint',
           'uint',
           'uint',
+          'uint'
         ],
         [
-          this.options.relayAddress,
+          'pay',
+          this.relayerAddress,
           request.to,
-          token,
-          this.options.factory,
+          request.token,
           request.value,
           request.fee,
           request.gasprice,
           request.nonce,
+          request.deadline
         ],
       )
+      console.log('Relayer:', this.relayerAddress)
       console.log('2')
-      const sig = await wallet.signMessage(ethers.utils.arrayify(hash))
+      const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
 
       request.sig = sig
-      return request
-      //   return this.relayAPI.post('/send', request)
+      return this.relayAPI.post('/send', request)
     }
   }
 
+  async getRelayer() {
+    const response = await this.relayAPI.get('/relayerAddress')
+    console.log('Response Relayer:', response.data)
+    this.relayerAddress = response.data.relayer
+    
+  }
   async getRelayFee(
     token: string,
     estimatedGas: ethers.utils.BigNumber,
@@ -259,7 +280,7 @@ export default class Wallet {
     var sig = ethers.utils.splitSignature(
       await wallet.signMessage(ethers.utils.arrayify(hash)),
     )
-    return this.factory.estimate[
+    return this.factoryContract.estimate[
       'deployWallet(uint256,address,address,uint256,uint8,bytes32,bytes32)'
     ](request.fee, token, request.to, request.value, sig.v, sig.r, sig.s, {
       from: this.options.relayAddress,
@@ -282,7 +303,7 @@ export default class Wallet {
       value,
       nonce: ethers.utils
         .bigNumberify(
-          await this.smartWallet!.store(
+          await this.smartWalletContract!.store(
             ethers.utils.formatBytes32String('nonce'),
           ),
         )
@@ -316,7 +337,7 @@ export default class Wallet {
       await wallet.signMessage(ethers.utils.arrayify(hash)),
     )
 
-    return this.smartWallet!.estimate[
+    return this.smartWalletContract!.estimate[
       'pay(address,uint256,uint256,address,uint8,bytes32,bytes32)'
     ](request.to, request.value, request.fee, token, sig.v, sig.r, sig.s, {
       from: this.options.relayAddress,
@@ -351,7 +372,7 @@ export default class Wallet {
       ).toString()
     } else {
       const smartWallet = new ethers.Contract(
-        this.walletAddress!,
+        this.smartWalletAddress!,
         smartWalletAbi,
         wallet,
       )
@@ -409,7 +430,7 @@ export default class Wallet {
       )
     } else {
       const smartWallet = new ethers.Contract(
-        this.walletAddress!,
+        this.smartWalletAddress!,
         smartWalletAbi,
         wallet,
       )
@@ -481,7 +502,7 @@ export default class Wallet {
   async getTokenBalance(address: string): Promise<string> {
     await this.queryCreate2Address()
     let tokenContract = new ethers.Contract(address, tokenAbi, this.provider)
-    let balance = await tokenContract.balanceOf(this.walletAddress)
+    let balance = await tokenContract.balanceOf(this.smartWalletAddress)
     return balance.toString()
   }
 

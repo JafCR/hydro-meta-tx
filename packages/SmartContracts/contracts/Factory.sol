@@ -67,16 +67,14 @@ contract Factory {
      * @param value Transfer amount
      * @param deadline Block number deadline for this signed message
      */
-    function deployWalletPay2(uint fee, address token, address to, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) onlyRelay public returns (address addr) {
+    function deployWalletPay(uint fee, address token, address to, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) onlyRelay public returns (address addr) {
         require(block.number <= deadline);
         address signer = recover(keccak256(abi.encodePacked("deployWalletPay", msg.sender, token, to, tx.gasprice, fee, value, deadline)), v, r, s);
-        return signer;
-        emit Deployed(signer, signer);
-        // addr = deployCreate2(signer);
-        // SmartWallet wallet = SmartWallet(uint160(addr));
-        // require(wallet.initiate(signer,address(registry), msg.sender, fee, token));
-        // require(wallet.pay(to, value, token));
-        // emit Deployed(addr, signer);
+        addr = deployCreate2(signer);
+        SmartWallet wallet = SmartWallet(uint160(addr));
+        require(wallet.initiate(signer,address(registry), msg.sender, fee, token));
+        require(wallet.pay(to, value, token));
+        emit Deployed(addr, signer);
         // return addr;
     }
     
@@ -225,9 +223,9 @@ contract Factory {
     /**
      * @dev Utility view function that allows clients to fetch own smart wallet address
      */
-    function getCreate2Address() public view returns (address) {
-        return getCreate2Address(msg.sender);
-    }
+    // function getCreate2Address() public view returns (address) {
+    //     return getCreate2Address(msg.sender);
+    // }
     
     /**
      * @dev Utility view function that allows clients to query whether a signer's smart wallet can be deployed or has already been
@@ -252,7 +250,7 @@ contract Factory {
      * @param messageHash Original hash
      */
     function recover(bytes32 messageHash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
-        bytes memory prefix = "\x19Ethereum Signed Message:\n000000";
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 prefixedMessageHash = keccak256(abi.encodePacked(prefix, messageHash));
         return ecrecover(prefixedMessageHash, v, r, s);
     }

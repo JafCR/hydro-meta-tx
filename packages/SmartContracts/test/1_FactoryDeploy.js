@@ -6,14 +6,12 @@ var SmartWallet = artifacts.require('SmartWallet')
 var TestERC20 = artifacts.require('TestERC20')
 var Proxy = artifacts.require('Proxy')
 const eth = require('ethereumjs-util')
-const Metacash = require('../../BackendAPI/lib/index.js')
+const HydroTxAPI = require('../../HydroMetaTxAPI/lib/index.js.js')
 const fs = require('fs')
 const ethers = require('ethers')
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
-var BN = require('bignumber.js')
-var sleep = require('sleep')
 
 chai.use(chaiAsPromised)
 expect = chai.expect
@@ -22,10 +20,9 @@ var should = require('chai').should()
 var relayAccount
 var rrInstance
 var factoryInstance
-var clientWallet
 var SWTemplate
 var predictedAddress
-var metacash
+var hydro
 var tokenInstance
 
 contract('Deployment Test', async accounts => {
@@ -61,12 +58,15 @@ contract('Deployment Test', async accounts => {
     console.log('   Relayer Address: ', ethers.utils.getAddress(adr))
 
     // Create Metacash instance.
-    metacash = new Metacash.default({
-      factory: factoryInstance.address,
-      relayer: adr,
+    hydro = new HydroTxAPI.default({
+      factoryAddress: factoryInstance.address,
+      fee:'1000',
+      gasprice:'10',
+      providerAddress:'http://localhost:8545',
+      relayHost: 'http://127.0.0.1:4000'
     })
 
-    walletRelayer = await metacash.decryptWallet(
+    walletRelayer = await hydro.importAccount(
       keyString.toString(),
       'test test test',
     )
@@ -78,7 +78,7 @@ contract('Deployment Test', async accounts => {
     console.log('   Private Key: ', walletRelayer.privateKey)
 
     let wei = web3.utils.toWei('1', 'ether').toString()
-    console.log('Wei:', wei)
+    console.log('   Wei:', wei)
     await web3.eth.sendTransaction({
       from: accounts[4],
       to: walletRelayer.address,
@@ -86,16 +86,16 @@ contract('Deployment Test', async accounts => {
     })
 
     let balance = await web3.eth.getBalance(walletRelayer.address)
-    console.log('Balance Relayuer: ', balance)
+    console.log('   Balance Relayer: ', balance)
   })
 
   it('04. Create user wallet and generate Smart Wallet address', async () => {
     keyString = await fs.readFileSync('./test/keystring')
-    clientWallet = await metacash.import(keyString.toString(), 'test test test')
-
-    console.log('   Client Address: ', clientWallet.keystore.address)
-    predictedAddress = await clientWallet.queryCreate2Address()
-    console.log('   Smart Wallet Predicted Address: ', predictedAddress)
+    clientSmartWallet = await hydro.importSmartWallet(keyString.toString(), 'test test test')
+    let signer = clientSmartWallet.address
+    console.log('Signer: ', signer)
+    // predictedAddress = await factoryInstance.getCreate2Address(signer)
+    predictedAddress = await clientSmartWallet.queryCreate2Address()
   })
 
   it('05. Deploy ERC20 Token and Mint 100 000 tokens to predicted address', async () => {
@@ -113,46 +113,28 @@ contract('Deployment Test', async accounts => {
     let value = 100
     let to = accounts[3]
     let token = tokenInstance.address
-    let decimals = 1
+    let decimals = 0
 
-    let provider = new ethers.providers.JsonRpcProvider()
-    let keyString = await fs.readFileSync('./test/keystring')
-    let wallet = await metacash.decryptWallet(
-      keyString.toString(),
-      'test test test',
-    )
-    wallet = wallet.connect(provider)
+    let before = []
+    let after = [] 
+    before['wallet'] = await tokenInstance.balanceOf(predictedAddress)
+    before['relayer'] = await tokenInstance.balanceOf(walletRelayer.address)
+    before['receiver'] = await tokenInstance.balanceOf(accounts[3])
+    
+    let response = await clientSmartWallet.transfer({ token, decimals, to, value })
+    console.log(response.data)
+    value = value * 3
+    response = await clientSmartWallet.transfer({ token, decimals, to, value })
+    console.log(response.data)
 
-    await clientWallet.transfer({ token, decimals, to, value, wallet })
+    after['wallet'] = await tokenInstance.balanceOf(predictedAddress)
+    after['relayer'] = await tokenInstance.balanceOf(walletRelayer.address)
+    after['receiver'] = await tokenInstance.balanceOf(accounts[3])
+
+    console.log('           Wallet | Relayer | Receiver')
+    console.log(`Before:    ${before['wallet']}  ${before['relayer']}  ${before['receiver']}`)
+    console.log(`After:     ${after['wallet']}  ${after['relayer']}  ${after['receiver']}`)
+
   })
-
-  return
-  it('05. Create Token Instance and Mint 1000 tokens to predicted Smart Wallet Address ', async () => {
-    predictedAddress = await factoryInstance.getCreate2Address(accounts[0], {
-      from: accounts[0],
-    })
-    let tx = await factoryInstance.deployWallet()
-    let walletAddress = tx.logs[0].args.addr
-    console.log('   Wallet    Address: ', walletAddress)
-    console.log('   Predicted Address: ', predictedAddress)
-
-    expect(walletAddress).to.be.equal(predictedAddress)
-
-    let instance = await SmartWallet.at(walletAddress)
-
-    let factory = await instance.store(web3.utils.fromAscii('factory'))
-    console.log('Factory:', factory)
-
-    factory = await instance.factory()
-    console.log('Factory:', factory)
-
-    let registry = await instance.registry()
-    console.log('Registry:', registry)
-    expect(registry).to.be.equal(relayInstance.address)
-
-    // should.not.equal(walletInstance, undefined)
-
-    // let relayAddress = await walletInstance.registry()
-    // expect(relayAddress).to.be.equal(relayInstance.address)
-  })
+ 
 })

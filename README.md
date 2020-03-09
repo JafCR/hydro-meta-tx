@@ -1,4 +1,4 @@
-***Based on [https://github.com/Lamarkaz/Metacash-contracts](https://github.com/Lamarkaz/Metacash-contracts)***
+
 
 # HYDRO META TRANSACTIONS
 
@@ -117,3 +117,6 @@ relayer.start(PORT)
 ```
 
 This will start relayer process on this machine listening on local port 4000
+
+
+***Based on [https://github.com/Lamarkaz/Metacash-contracts](https://github.com/Lamarkaz/Metacash-contracts)***

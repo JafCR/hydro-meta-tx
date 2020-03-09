@@ -103,6 +103,7 @@ Returns ethers wallet instance based on provided keystore and password
  * decimals - number of decimals of this token ( soon to be deprecated )
  * to - address of the receiving account
  * value - token amount to be transfered to *to* address 
+ 
  Returns answer from relayer backend server. 
 
 ## HOW TO USE RELAYER

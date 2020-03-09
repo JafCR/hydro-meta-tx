@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/robertmagier/hydro-meta-tx#readme",
   "devDependencies": {
+    "express": "^4.17.1",
     "nodemon": "^2.0.2",
     "prettier": "^1.17.0",
     "tslint": "^5.16.0",
@@ -38,7 +39,6 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "ethers": "^4.0.45",
-    "express": "^4.17.1",
     "ganache-cli": "^6.9.1",
     "sleep": "^6.1.0",
     "truffle": "^5.1.15"

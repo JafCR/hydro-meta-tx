@@ -6,7 +6,7 @@ var SmartWallet = artifacts.require('SmartWallet')
 var TestERC20 = artifacts.require('TestERC20')
 var Proxy = artifacts.require('Proxy')
 const eth = require('ethereumjs-util')
-const HydroTxAPI = require('../../HydroMetaTxAPI/lib/index.js.js')
+const HydroTxAPI = require('hydro-meta-tx').api
 const fs = require('fs')
 const ethers = require('ethers')
 

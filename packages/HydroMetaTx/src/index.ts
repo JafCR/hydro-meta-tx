@@ -1,5 +1,5 @@
-import * as ethers from 'ethers'
 import axios, { AxiosInstance } from 'axios'
+import * as ethers from 'ethers'
 import Wallet from './wallet'
 
 ethers.errors.setLogLevel('error')

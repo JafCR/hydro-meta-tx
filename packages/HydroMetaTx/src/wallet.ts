@@ -148,7 +148,6 @@ export default class Wallet {
           request.deadline,
         ],
       )
-      console.log('1')
       const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
       request.sig = sig
 
@@ -187,8 +186,6 @@ export default class Wallet {
           request.deadline
         ],
       )
-      console.log('Relayer:', this.relayerAddress)
-      console.log('2')
       const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
 
       request.sig = sig
@@ -198,7 +195,6 @@ export default class Wallet {
 
   async getRelayer() {
     const response = await this.relayAPI.get('/relayerAddress')
-    console.log('Response Relayer:', response.data)
     this.relayerAddress = response.data.relayer
     
   }
@@ -446,7 +442,6 @@ export default class Wallet {
   async getWallet(
     walletOrPassword: string | ethers.Wallet,
   ): Promise<ethers.Wallet> {
-    console.log('Wallet:', walletOrPassword)
     if (typeof walletOrPassword === 'string') {
       try {
         return (

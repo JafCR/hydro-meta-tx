@@ -1,3 +1,0 @@
-!/bin/bash
-
-geth --dev --allow-insecure-unlock --rpc --ws js ./test/geth_script.js

@@ -24,30 +24,24 @@ const provider = new ethers.providers.JsonRpcProvider()
 provider.pollingInterval = 500
 
 var relayerWallet = new ethers.Wallet(privateKey, provider)
-console.log('Address: ', relayerWallet.address)
 
 router.get('/relayerAddress', async function(req, res) {
-  console.log(relayerWallet.address)
   res.send({ relayer: relayerWallet.address })
 })
 
 router.post('/deploySend', async function(req, res) {
-  console.log(req.body)
   let request = req.body
   let sig = ethers.utils.splitSignature(request.sig)
   let factory = request.factory
-  let balance = await relayerWallet.getBalance()
-  console.log(balance.toString())
 
   let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet)
-  console.log('Gas Price: ', request.gasprice)
 
   factoryContract.on('Deployed', (addr, owner) => {
-    console.log('Deployed: ', owner, addr)
     let result = {
       contract: addr,
       owner: owner,
     }
+    console.log('Response:', result)
     res.send(result)
   })
   var tx
@@ -73,7 +67,6 @@ router.post('/deploySend', async function(req, res) {
 })
 
 router.post('/send', async function(req, res) {
-  console.log(req.body)
   let request = req.body
   let sig = ethers.utils.splitSignature(request.sig)
   let smartWallet = request.smartWallet
@@ -85,7 +78,6 @@ router.post('/send', async function(req, res) {
   )
 
   smartWalletContract.on('Paid', (from, to, token, value, fee) => {
-    console.log(`From: ${from} To: ${to} Token:${token} Value:${value} Fee: ${fee}`)
     let result = {
       from,
       to,
@@ -93,10 +85,10 @@ router.post('/send', async function(req, res) {
       value,
       fee,
     }
+    console.log('Response:', result)
     res.send(result)
   })
   var tx
-  console.log('Nonce: ', request.nonce)
   try {
     tx = await smartWalletContract.pay(
       request.to,

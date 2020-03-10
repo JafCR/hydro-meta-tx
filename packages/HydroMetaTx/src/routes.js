@@ -17,16 +17,20 @@ const SmartWalletABI = [
   'event Paid(address from, address to, address tokenContract, uint value,uint fee)'
 ]
 
-const privateKey =
-  '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
+function relayerWallet() {
 
-const provider = new ethers.providers.JsonRpcProvider()
-provider.pollingInterval = 500
+  const privateKey =
+    '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
+  const provider = new ethers.providers.JsonRpcProvider()
+  provider.pollingInterval = 500
+  return new ethers.Wallet(privateKey, provider)
 
-var relayerWallet = new ethers.Wallet(privateKey, provider)
+}
+
+
 
 router.get('/relayerAddress', async function(req, res) {
-  res.send({ relayer: relayerWallet.address })
+  res.send({ relayer: relayerWallet().address })
 })
 
 router.post('/deploySend', async function(req, res) {
@@ -34,7 +38,7 @@ router.post('/deploySend', async function(req, res) {
   let sig = ethers.utils.splitSignature(request.sig)
   let factory = request.factory
 
-  let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet)
+  let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet())
 
   factoryContract.on('Deployed', (addr, owner) => {
     let result = {
@@ -74,7 +78,7 @@ router.post('/send', async function(req, res) {
   let smartWalletContract = new ethers.Contract(
     smartWallet,
     SmartWalletABI,
-    relayerWallet,
+    relayerWallet(),
   )
 
   smartWalletContract.on('Paid', (from, to, token, value, fee) => {

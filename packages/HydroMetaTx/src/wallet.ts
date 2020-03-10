@@ -35,9 +35,10 @@ export default class Wallet {
   fee: any
   gasprice: any
 
-  constructor(_keystore: string,password:string, opts: object) {
+
+
+  constructor(opts: object) {
     this.options = opts
-    this.keystore = _keystore
       // typeof _keystore === 'string' ? JSON.parse(_keystore) : _keystore
     // this.provider = ethers.getDefaultProvider(this.options.provider)
     this.fee = this.options.fee
@@ -47,18 +48,16 @@ export default class Wallet {
       baseURL: this.options.relayHost,
       timeout: 30000,
     })
+    this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress)
+
 
   }
-
-  async init(password:string) {
-
-    this.ethersWallet = await ethers.Wallet.fromEncryptedJson(this.keystore,password)
-    this.signer = ethers.utils.getAddress(this.ethersWallet.address)
-    this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress)
+  
+  async _init() {
     this.ethersWallet = this.ethersWallet.connect(this.provider!)
+    this.signer = ethers.utils.getAddress(this.ethersWallet.address)
     this.address = this.ethersWallet.address
     await this.getRelayer()
-
     this.factoryContract = new ethers.Contract(
       this.factoryAddress!,
       factoryAbi,
@@ -67,6 +66,21 @@ export default class Wallet {
 
   }
 
+  async initPrivateKey(privateKey:string) {
+    this.ethersWallet = new ethers.Wallet(privateKey)
+    await this._init()
+  }
+  
+  async initKeyStore(_keystore: string, password:string) {
+    this.keystore = _keystore
+    this.ethersWallet = await ethers.Wallet.fromEncryptedJson(this.keystore,password)
+    await this._init()  
+  }
+  
+  get privateKey() {
+    return this.ethersWallet.privateKey
+  }
+  
 
   async queryCreate2Address() {
     if (typeof this.smartWalletAddress === 'string') return this.smartWalletAddress
@@ -192,6 +206,8 @@ export default class Wallet {
       return this.relayAPI.post('/send', request)
     }
   }
+
+
 
   async getRelayer() {
     const response = await this.relayAPI.get('/relayerAddress')

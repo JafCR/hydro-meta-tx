@@ -1,6 +1,6 @@
 {
   "name": "hydro-meta-tx",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Hydro Meta Transactions",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "lint": "tslint -p tsconfig.json",
     "build": "tsc",
     "test": "echo No test",
+    "testWallet": "mocha test/testWallet.js",
     "version": "tsc -v"
   },
   "repository": {

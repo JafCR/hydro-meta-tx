@@ -20,22 +20,32 @@ export default class MetaTx {
     })
   }
 
+  get factoryAddress() {
+    return this.options.factoryAddress
+  }
 
   async createSmartWallet(password: string) {
     var account = ethers.Wallet.createRandom()
     var keystore = await account.encrypt(password)
-    var smartWallet = new Wallet(keystore, password, this.options)
+    var smartWallet = new Wallet(this.options)
     let result = {
       keystore,
       smartWallet,
       account
     }
+    await smartWallet.initKeyStore(keystore,password)
     return result
   }
 
-  async importSmartWallet(keystore: string, password: string) {
-    var smartWallet = new Wallet(keystore, password, this.options)
-    await smartWallet.init(password)
+  async importKeyStore(keystore: string, password: string) {
+    var smartWallet = new Wallet(this.options)
+    await smartWallet.initKeyStore(keystore,password)
+    return smartWallet
+  }
+
+  async importPrivateKey(privateKey: string) {
+    var smartWallet = new Wallet(this.options)
+    await smartWallet.initPrivateKey(privateKey)
     return smartWallet
   }
 

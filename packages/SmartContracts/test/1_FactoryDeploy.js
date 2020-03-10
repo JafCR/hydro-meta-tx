@@ -91,7 +91,7 @@ contract('Deployment Test', async accounts => {
 
   it('04. Create user wallet and generate Smart Wallet address', async () => {
     keyString = await fs.readFileSync('./test/keystring')
-    clientSmartWallet = await hydro.importSmartWallet(keyString.toString(), 'test test test')
+    clientSmartWallet = await hydro.importKeyStore(keyString.toString(), 'test test test')
     let signer = clientSmartWallet.address
     console.log('Signer: ', signer)
     // predictedAddress = await factoryInstance.getCreate2Address(signer)

@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 class Relayer {
 
     start(port) {
+
+        console.log('Starting Relayer at port:', port)
         const app = express()
         app.use(bodyParser.urlencoded({ extended: true }))
         app.use(bodyParser.json())
@@ -22,7 +24,8 @@ class Relayer {
             req.next()
         })
         app.use(router)
-        app.listen(port)
+        return app.listen(port)
+
     }
 }
 

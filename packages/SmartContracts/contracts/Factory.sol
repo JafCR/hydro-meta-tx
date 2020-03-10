@@ -223,9 +223,9 @@ contract Factory {
     /**
      * @dev Utility view function that allows clients to fetch own smart wallet address
      */
-    // function getCreate2Address() public view returns (address) {
-    //     return getCreate2Address(msg.sender);
-    // }
+    function getCreate2Address() public view returns (address) {
+        return getCreate2Address(msg.sender);
+    }
     
     /**
      * @dev Utility view function that allows clients to query whether a signer's smart wallet can be deployed or has already been

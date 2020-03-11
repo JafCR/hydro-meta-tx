@@ -1,7 +1,7 @@
 const express = require('express')
-const router = require('./routes.js')
+const routes = require('./routes.js')
 const bodyParser = require('body-parser')
-
+const logger = require('./logger.js')
 class Relayer {
 
     start(port,privateKey) {
@@ -15,26 +15,15 @@ class Relayer {
         app.use(bodyParser.urlencoded({ extended: true }))
         app.use(bodyParser.json())
         app.all('*',(req,res,next)=>{
-            console.log('All')
-            console.log(req.params)
+            logger.info(`NEW REQUEST ${req.method} ${req.originalUrl}`)
+            logger.debug(`PARAMS: ${JSON.stringify(req.params)}`)
             req.privateKey = privateKey
+            req.logger = logger
             req.next()
+
         })
         // app.use(bodyParser.raw())
-        app.get('*',(req,res)=>{
-            console.log('GET REQUEST')
-            console.log(req.originalUrl)
-            console.log(req.params)
-            req.next()
-        })
-        app.post('*',(req,res)=>{
-            console.log('POST REQUEST')
-            console.log(req.originalUrl)
-            console.log(req.body)
-            console.log(req.params)
-            req.next()
-        })
-        app.use(router)
+        app.use(routes)
         return app.listen(port)
 
     }

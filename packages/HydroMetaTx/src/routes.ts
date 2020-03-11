@@ -1,6 +1,6 @@
-const express = require('express')
-const router = express.Router()
-
+const exp = require('express')
+const router = exp.Router()
+const loggerRoutes = require('./logger.js')
 const ethers = require('ethers')
 
 const factoryAbi = [
@@ -35,8 +35,9 @@ async function getChainId(privateKey) {
 
 
 router.get('/relayerAddress', async function(req, res) {
-  console.log('Response: ', {relayer:relayerWallet(req.privateKey).address})
-  res.send({ relayer: relayerWallet(req.privateKey).address })
+  let result = {relayer:relayerWallet(req.privateKey).address}
+  loggerRoutes.debug('Response', result)
+  res.send(result)
 })
 
 router.post('/deploySend', async function(req, res) {
@@ -51,7 +52,7 @@ router.post('/deploySend', async function(req, res) {
       contract: addr,
       owner: owner,
     }
-    console.log('Response:', result)
+    loggerRoutes.debug('Response:', result)
     res.send(result)
   })
   var tx
@@ -72,8 +73,8 @@ router.post('/deploySend', async function(req, res) {
       },
     )
   } catch (e) {
-    console.log(e)
-    console.log(tx)
+    loggerRoutes.error(e)
+    loggerRoutes.error(tx)
   }
 })
 
@@ -96,7 +97,7 @@ router.post('/send', async function(req, res) {
       value,
       fee,
     }
-    console.log('Response:', result)
+    loggerRoutes.debug('Response:', result)
     res.send(result)
   })
   var tx
@@ -117,8 +118,8 @@ router.post('/send', async function(req, res) {
       },
     )
   } catch (e) {
-    console.log(e)
-    console.log(tx)
+    loggerRoutes.error(e)
+    loggerRoutes.error(tx)
   }
 })
 

@@ -1,6 +1,7 @@
 import * as ethers from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import BigNumber from 'bignumber.js'
+const logger = require('./logger.js')
 
 ethers.errors.setLogLevel('error')
 
@@ -50,7 +51,7 @@ export default class Wallet {
       timeout: 30000,
     })
     this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress)
-
+    logger.debug(`New Hydro Wallet instance. Factory: ${this.factoryAddress} `)
 
   }
   
@@ -115,7 +116,7 @@ export default class Wallet {
     wallet: ethers.Wallet
   }): Promise<any> {
     await this.queryCreate2Address()
-
+    logger.debug('Transfer: ', {token,decimals,to,value},{signer:this.signer, smartWalletAddress:this.smartWalletAddress})
     // Get current block number and calculate deadline block.
     let blockNumber = await this.provider.getBlockNumber()
     let deadline = blockNumber + 10
@@ -168,8 +169,10 @@ export default class Wallet {
       )
       const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
       request.sig = sig
-
-      return this.relayAPI.post('/deploySend', request)
+      
+      let result = await  this.relayAPI.post('/deploySend', request)
+      logger.debug('Transfer result: ', result.data)
+      return result
     } else {
       request.smartWallet = this.smartWalletAddress
       request.nonce = ethers.utils
@@ -207,7 +210,9 @@ export default class Wallet {
       const sig = await this.ethersWallet.signMessage(ethers.utils.arrayify(hash))
 
       request.sig = sig
-      return this.relayAPI.post('/send', request)
+      let result = await  this.relayAPI.post('/send', request)
+      logger.debug('Transfer result: ', result.data)
+      return result
     }
   }
 

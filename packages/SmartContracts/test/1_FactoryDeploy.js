@@ -59,7 +59,8 @@ contract('Deployment Test', async accounts => {
 
     // Create Metacash instance.
     hydro = new HydroTxAPI.default({
-      factoryAddress: factoryInstance.address,
+      factoryAddress: '0x936FAE52582d865be7242FF0E5f3e344b1D2036f',
+      // factoryAddress: factoryInstance.address,
       fee:'1000',
       gasprice:'10',
       providerAddress:'http://localhost:8545',

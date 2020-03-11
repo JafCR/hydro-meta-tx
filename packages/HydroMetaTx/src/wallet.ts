@@ -34,6 +34,7 @@ export default class Wallet {
   relayerAddress: string
   fee: any
   gasprice: any
+  chainId:any
 
 
 
@@ -63,6 +64,9 @@ export default class Wallet {
       factoryAbi,
       this.ethersWallet,
     )
+    await this.queryCreate2Address()
+    // let network = await this.provider.getNetwork()
+    // this.chainId = network.chainId
 
   }
 

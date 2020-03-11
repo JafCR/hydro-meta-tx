@@ -11,16 +11,18 @@ const Relayer = require('../index.js').relayer
 
 let relayer = new Relayer()
 const RELAYER_PORT = 44444
-var relayerInstance = relayer.start(RELAYER_PORT)
+const PRIVATEKEY = '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
+var relayerInstance = relayer.start(RELAYER_PORT,PRIVATEKEY)
 
 chai.use(chaiAsPromised)
 expect = chai.expect
 var hydro
 var privateKey
-var swAddress
+var signer
+var swaddress
 var swKeystore
 
-var dummyFactoryAddress = '0xDc5ceEE4A36133a4b31285675545CD230B09A5c4'
+var factoryAddress = '0x68e7FAFC6fFe9151D87122dB0dA1cF67902406A0'
 
 describe('Test', async function(accounts) {
 
@@ -34,13 +36,13 @@ describe('Test', async function(accounts) {
 
   it('01. Deploy Hydro-Meta-Tx', async () => {
     hydro = new HydroTxAPI.default({
-      factoryAddress: dummyFactoryAddress,
+      factoryAddress: factoryAddress,
       fee:'1000',
       gasprice:'10',
       providerAddress:'http://localhost:8545',
       relayHost: `http://127.0.0.1:${RELAYER_PORT}`
     })
-    expect(hydro.factoryAddress).to.be.equal(dummyFactoryAddress)
+    expect(hydro.factoryAddress).to.be.equal(factoryAddress)
   })
 
   it('02. Create new Smart Wallet', async () => {
@@ -48,14 +50,16 @@ describe('Test', async function(accounts) {
     let {smartWallet} = await hydro.createSmartWallet(password)
     let relayerAddress = smartWallet.relayerAddress
 
+    console.log('     Relayer Address         : ', relayerAddress)
     expect(relayerAddress).to.be.not.equal(undefined)
-    console.log('     Relayer Address: ', relayerAddress)
 
     privateKey = smartWallet.privateKey
-    swAddress = smartWallet.address
+    signer = smartWallet.address
     swKeystore = smartWallet.keystore
+    swaddress = smartWallet.smartWalletAddress
     console.log('     Smart Wallet Private Key: ', privateKey  )
-    console.log('     Smart Wallet Address    : ', swAddress  )
+    console.log('     Smart Wallet Signer     : ', signer  )
+    console.log('     Smart Wallet Address    : ', swaddress  )
   })
 
   it('03. Deploy Smart Wallet From PrivateKey', async () => {
@@ -64,13 +68,15 @@ describe('Test', async function(accounts) {
     let relayerAddress = smartWallet.relayerAddress
 
     expect(relayerAddress).to.be.not.equal(undefined)
-    console.log('     Relayer Address: ', relayerAddress)
+    console.log('     Relayer Address         : ', relayerAddress)
 
     console.log('     Smart Wallet Private Key: ', privateKey  )
-    console.log('     Smart Wallet Address    : ', swAddress  )
+    console.log('     Smart Wallet Signer     : ', signer  )
+    console.log('     Smart Wallet Address    : ', swaddress  )
 
     expect (smartWallet.privateKey).to.be.equal(privateKey)
-    expect (smartWallet.address).to.be.equal(swAddress)
+    expect (smartWallet.address).to.be.equal(signer)
+    expect (smartWallet.smartWalletAddress).to.be.equal(swaddress)
   })
 
   it('04. Deploy Smart Wallet From Keystore', async () => {
@@ -79,13 +85,15 @@ describe('Test', async function(accounts) {
     let relayerAddress = smartWallet.relayerAddress
 
     expect(relayerAddress).to.be.not.equal(undefined)
-    console.log('     Relayer Address: ', relayerAddress)
+    console.log('     Relayer Address         : ', relayerAddress)
 
     console.log('     Smart Wallet Private Key: ', privateKey  )
-    console.log('     Smart Wallet Address    : ', swAddress  )
+    console.log('     Smart Wallet Signer     : ', signer  )
+    console.log('     Smart Wallet Address    : ', swaddress  )
 
     expect (smartWallet.privateKey).to.be.equal(privateKey)
-    expect (smartWallet.address).to.be.equal(swAddress)
+    expect (smartWallet.address).to.be.equal(signer)
+    expect (smartWallet.smartWalletAddress).to.be.equal(swaddress)
   })
 
 

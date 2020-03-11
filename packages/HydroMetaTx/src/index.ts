@@ -20,11 +20,8 @@ export default class MetaTx {
       baseURL: this.options.relayHost,
       timeout: 30000,
     })
-    this.options.providerAddress = 'kjdsfjh'
     this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress!)
-    
-
-    logger.debug('New Hydro-Meta-Tx instance. Factory: ', this.options.factoryAddress )
+    logger.debug('New Hydro-Meta-Tx instance,', this.options )
   }
 
   get factoryAddress() {

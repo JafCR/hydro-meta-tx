@@ -105,7 +105,6 @@ export default class Wallet {
 
   async transfer({
     token,
-    decimals,
     to,
     value,
   }: {
@@ -116,7 +115,7 @@ export default class Wallet {
     wallet: ethers.Wallet
   }): Promise<any> {
     await this.queryCreate2Address()
-    logger.debug('Transfer: ', {token,decimals,to,value},{signer:this.signer, smartWalletAddress:this.smartWalletAddress})
+    logger.debug('Transfer: ', {token,to,value},{signer:this.signer, smartWalletAddress:this.smartWalletAddress})
     // Get current block number and calculate deadline block.
     let blockNumber = await this.provider.getBlockNumber()
     let deadline = blockNumber + 10
@@ -124,7 +123,7 @@ export default class Wallet {
     let gaspriceInWei
     try {
       var txFee
-      txFee = new BigNumber(this.fee).shiftedBy(decimals).toFixed()
+      txFee = new BigNumber(this.fee).toFixed()
       gaspriceInWei = ethers.utils.parseUnits(String(this.gasprice), 'gwei')
     } catch (e) {
       throw e

@@ -59,8 +59,8 @@ contract('Deployment Test', async accounts => {
 
     // Create Metacash instance.
     hydro = new HydroTxAPI.default({
-      factoryAddress: '0x936FAE52582d865be7242FF0E5f3e344b1D2036f',
-      // factoryAddress: factoryInstance.address,
+      // factoryAddress: '0x936FAE52582d865be7242FF0E5f3e344b1D2036f',
+      factoryAddress: factoryInstance.address,
       fee:'1000',
       gasprice:'10',
       providerAddress:'http://localhost:8545',
@@ -114,7 +114,6 @@ contract('Deployment Test', async accounts => {
     let value = 100
     let to = accounts[3]
     let token = tokenInstance.address
-    let decimals = 0
 
     let before = []
     let after = [] 
@@ -122,10 +121,10 @@ contract('Deployment Test', async accounts => {
     before['relayer'] = await tokenInstance.balanceOf(walletRelayer.address)
     before['receiver'] = await tokenInstance.balanceOf(accounts[3])
     
-    let response = await clientSmartWallet.transfer({ token, decimals, to, value })
+    let response = await clientSmartWallet.transfer({ token,  to, value })
     console.log(response.data)
     value = value * 3
-    response = await clientSmartWallet.transfer({ token, decimals, to, value })
+    response = await clientSmartWallet.transfer({ token, to, value })
     console.log(response.data)
 
     after['wallet'] = await tokenInstance.balanceOf(predictedAddress)

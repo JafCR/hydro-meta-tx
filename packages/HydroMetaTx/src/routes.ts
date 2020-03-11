@@ -17,15 +17,24 @@ const SmartWalletABI = [
   'event Paid(address from, address to, address tokenContract, uint value,uint fee)'
 ]
 
-function relayerWallet(privateKey) {
+function relayerWallet(privateKey:string) {
 
+  if(!privateKey) {
+    logger.error('Private key was not provided: ', privateKey )
+  }
   const provider = new ethers.providers.JsonRpcProvider()
   provider.pollingInterval = 500
-  return new ethers.Wallet(privateKey, provider)
+  try {
+    return new ethers.Wallet(privateKey, provider)
+  }
+  catch(e) {
+    logger.error('Private key is incorrect: ', privateKey, e)
+    return null
+  }
 
 }
 
-async function getChainId(privateKey) {
+async function getChainId(privateKey:string) {
 
   let rw = relayerWallet(privateKey)
   let network = await rw.provider.getNetwork()
@@ -47,7 +56,7 @@ router.post('/deploySend', async function(req, res) {
 
   let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet(req.privateKey))
 
-  factoryContract.on('Deployed', async (addr, owner) => {
+  factoryContract.on('Deployed', async (addr:string, owner:string) => {
     let result = {
       contract: addr,
       owner: owner,

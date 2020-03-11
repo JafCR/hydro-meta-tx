@@ -2,53 +2,55 @@ import axios, { AxiosInstance } from 'axios'
 import * as ethers from 'ethers'
 import Wallet from './wallet'
 const logger = require('./logger.js')
-
+import * as Verify from './verify.js'
 
 ethers.errors.setLogLevel('error')
 
 export default class MetaTx {
-  options: any = {
-  }
+  options: any = {}
 
   wallet: Wallet | undefined
   provider: ethers.providers.JsonRpcProvider
   relayAPI: AxiosInstance
 
-  constructor(opts: object = {}) {
+  constructor(opts: Hydro.Constructor) {
+    if (!Verify.hydroConstructor(opts)) {
+      throw('Invalid Hydro Constructor parameters')
+    }
     this.options = Object.assign(this.options, opts)
     this.relayAPI = axios.create({
       baseURL: this.options.relayHost,
       timeout: 30000,
     })
     this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress!)
-    logger.debug('New Hydro-Meta-Tx instance,', this.options )
+    logger.debug('New Hydro-Meta-Tx instance,', this.options)
   }
 
   get factoryAddress() {
     return this.options.factoryAddress
   }
 
-  async verifyFactory():Promise<boolean> {
+  async verifyFactory(): Promise<boolean> {
 
     try {
       let blockNumber = await this.provider.getBlockNumber()
     }
-    catch(e) {
-      logger.fatal('Provider error: ', this.options.providerAddress,e)
-      throw('Provider error: ' + this.options.providerAddress)
+    catch (e) {
+      logger.fatal('Provider error: ', this.options.providerAddress, e)
+      throw ('Provider error: ' + this.options.providerAddress)
     }
 
-    var code 
+    var code
     try {
       code = await this.provider.getCode(this.options.factoryAddress)
     }
-    catch(e) {
-      logger.fatal('Wrong factory address: ', this.options.factoryAddress,e)
-      throw('Wrong factory address: ' + this.options.factoryAddress)
+    catch (e) {
+      logger.fatal('Wrong factory address: ', this.options.factoryAddress, e)
+      throw ('Wrong factory address: ' + this.options.factoryAddress)
     }
-    if(code=='0x') {
-      logger.fatal('Factory code: ',code,' Factory does not exist: ',this.options.factoryAddress)
-      throw('This is not a smart contract. Factory does not exist: ' + this.options.factoryAddress)
+    if (code == '0x') {
+      logger.fatal('Factory code: ', code, ' Factory does not exist: ', this.options.factoryAddress)
+      throw ('This is not a smart contract. Factory does not exist: ' + this.options.factoryAddress)
     }
     return true
   }
@@ -64,7 +66,7 @@ export default class MetaTx {
       smartWallet,
       account
     }
-    await smartWallet.initKeyStore(keystore,password)
+    await smartWallet.initKeyStore(keystore, password)
     logger.debug('CreateSmartWallet: ', result)
     return result
   }
@@ -72,8 +74,8 @@ export default class MetaTx {
   async importKeyStore(keystore: string, password: string) {
     await this.verifyFactory()
     var smartWallet = new Wallet(this.options)
-    await smartWallet.initKeyStore(keystore,password)
-    logger.debug('importKeyStore: ', {smartwallet:smartWallet.address, signer:smartWallet.signer})
+    await smartWallet.initKeyStore(keystore, password)
+    logger.debug('importKeyStore: ', { smartwallet: smartWallet.address, signer: smartWallet.signer })
     return smartWallet
   }
 
@@ -81,7 +83,7 @@ export default class MetaTx {
     await this.verifyFactory()
     var smartWallet = new Wallet(this.options)
     await smartWallet.initPrivateKey(privateKey)
-    logger.debug('improtPrivateKey: ', {smartwallet:smartWallet.address, signer:smartWallet.signer})
+    logger.debug('improtPrivateKey: ', { smartwallet: smartWallet.address, signer: smartWallet.signer })
     return smartWallet
   }
 

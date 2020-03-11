@@ -37,8 +37,6 @@ describe('Test', async function(accounts) {
   it('01. Deploy Hydro-Meta-Tx', async () => {
     hydro = new HydroTxAPI.default({
       factoryAddress: factoryAddress,
-      fee:'1000',
-      gasprice:'10',
       providerAddress:'http://localhost:8545',
       relayHost: `http://127.0.0.1:${RELAYER_PORT}`
     })

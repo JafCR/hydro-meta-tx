@@ -52,20 +52,23 @@ contract('Deployment Test', async accounts => {
   })
 
   it('03. Add Relayer to Relayer Registry', async () => {
-    keyString = await fs.readFileSync('./test/keystringRelayer')
+    keyString = await fs.readFileSync('./test/keystores/keystringRelayer')
     let keystore = JSON.parse(keyString.toString())
     let adr = '0x' + keystore.address
     console.log('   Relayer Address: ', ethers.utils.getAddress(adr))
 
     // Create Metacash instance.
-    hydro = new HydroTxAPI.default({
+
+    let hydroOptions = {
       // factoryAddress: '0x936FAE52582d865be7242FF0E5f3e344b1D2036f',
-      factoryAddress: factoryInstance.address,
-      fee:'1000',
-      gasprice:'10',
-      providerAddress:'http://localhost:8545',
-      relayHost: 'http://127.0.0.1:4000'
-    })
+      // factoryAddress: factoryInstance.address,
+      providerAddress: 'http://localhost:8545',
+      relayHost: 'http://127.0.0.1:4000',
+    }
+    expect(()=>{new HydroTxAPI.default(hydroOptions)}).to.throw()
+    hydroOptions.factoryAddress = factoryInstance.address
+    hydro = new HydroTxAPI.default(hydroOptions)
+    expect(hydro).to.be.not.undefined
 
     walletRelayer = await hydro.importAccount(
       keyString.toString(),
@@ -91,8 +94,11 @@ contract('Deployment Test', async accounts => {
   })
 
   it('04. Create user wallet and generate Smart Wallet address', async () => {
-    keyString = await fs.readFileSync('./test/keystring')
-    clientSmartWallet = await hydro.importKeyStore(keyString.toString(), 'test test test')
+    keyString = await fs.readFileSync('./test/keystores/keystring')
+    clientSmartWallet = await hydro.importKeyStore(
+      keyString.toString(),
+      'test test test',
+    )
     let signer = clientSmartWallet.address
     console.log('Signer: ', signer)
     // predictedAddress = await factoryInstance.getCreate2Address(signer)
@@ -116,15 +122,30 @@ contract('Deployment Test', async accounts => {
     let token = tokenInstance.address
 
     let before = []
-    let after = [] 
+    let after = []
     before['wallet'] = await tokenInstance.balanceOf(predictedAddress)
     before['relayer'] = await tokenInstance.balanceOf(walletRelayer.address)
     before['receiver'] = await tokenInstance.balanceOf(accounts[3])
-    
-    let response = await clientSmartWallet.transfer({ token,  to, value })
+    let fee = '1000'
+    let gasprice = '10'
+    // Check if transfer function will fail with incorrect input parameters
+    await expect(clientSmartWallet.transfer({})).to.be.eventually.rejected
+    let response = await clientSmartWallet.transfer({
+      token,
+      gasprice,
+      to,
+      value,
+      fee,
+    })
     console.log(response.data)
     value = value * 3
-    response = await clientSmartWallet.transfer({ token, to, value })
+    response = await clientSmartWallet.transfer({
+      token,
+      fee,
+      gasprice,
+      to,
+      value,
+    })
     console.log(response.data)
 
     after['wallet'] = await tokenInstance.balanceOf(predictedAddress)
@@ -132,9 +153,11 @@ contract('Deployment Test', async accounts => {
     after['receiver'] = await tokenInstance.balanceOf(accounts[3])
 
     console.log('           Wallet | Relayer | Receiver')
-    console.log(`Before:    ${before['wallet']}  ${before['relayer']}  ${before['receiver']}`)
-    console.log(`After:     ${after['wallet']}  ${after['relayer']}  ${after['receiver']}`)
-
+    console.log(
+      `Before:    ${before['wallet']}  ${before['relayer']}  ${before['receiver']}`,
+    )
+    console.log(
+      `After:     ${after['wallet']}  ${after['relayer']}  ${after['receiver']}`,
+    )
   })
- 
 })

@@ -2,6 +2,8 @@ import * as ethers from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import BigNumber from 'bignumber.js'
 const logger = require('./logger.js')
+import * as Verify from './verify.js'
+
 
 ethers.errors.setLogLevel('error')
 
@@ -39,12 +41,14 @@ export default class Wallet {
 
 
 
-  constructor(opts: object) {
+  constructor(opts: Wallet.Constructor) {
+
+    if(!Verify.walletConstructor(opts)) {
+      throw('Invalid Wallet Constructor parameters')
+    }
     this.options = opts
       // typeof _keystore === 'string' ? JSON.parse(_keystore) : _keystore
     // this.provider = ethers.getDefaultProvider(this.options.provider)
-    this.fee = this.options.fee
-    this.gasprice = this.options.gasprice
     this.factoryAddress = this.options.factoryAddress
     this.relayAPI = axios.create({
       baseURL: this.options.relayHost,
@@ -107,13 +111,17 @@ export default class Wallet {
     token,
     to,
     value,
-  }: {
-    token: string
-    decimals: number
-    to: string
-    value: string
-    wallet: ethers.Wallet
-  }): Promise<any> {
+    fee,
+    gasprice
+  }: Routes.TransferRequest
+  ): Promise<any> {
+
+    let verified:boolean  = Verify.deploySend({token,to,value,fee,gasprice})
+    if(!verified) {
+      logger.error("transfer", "Incorrect input parameters")
+      return Promise.reject('Transfer: Incorret input parameters')
+    }
+
     await this.queryCreate2Address()
     logger.debug('Transfer: ', {token,to,value},{signer:this.signer, smartWalletAddress:this.smartWalletAddress})
     // Get current block number and calculate deadline block.
@@ -123,8 +131,8 @@ export default class Wallet {
     let gaspriceInWei
     try {
       var txFee
-      txFee = new BigNumber(this.fee).toFixed()
-      gaspriceInWei = ethers.utils.parseUnits(String(this.gasprice), 'gwei')
+      txFee = new BigNumber(fee).toFixed()
+      gaspriceInWei = ethers.utils.parseUnits(String(gasprice), 'gwei')
     } catch (e) {
       throw e
     }

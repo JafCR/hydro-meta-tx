@@ -4,8 +4,10 @@
       "module": "commonjs",
       "declaration": true,
       "outDir": "./lib",
-      "strict": false
+      "strict": false,
+      // "typeRoots": [".src/types"]
     },
     "include": ["src"],
+    "files": ["./src/types/index.d.ts"],
     "exclude": ["node_modules", "**/__tests__/*"]
   }

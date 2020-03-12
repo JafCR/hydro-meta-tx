@@ -26,3 +26,6 @@ run_geth() {
     js ./scripts/geth-accounts.js 
 #> /dev/null &
 }
+
+run_geth
+sleep 30

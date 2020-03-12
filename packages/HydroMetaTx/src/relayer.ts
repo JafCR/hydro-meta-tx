@@ -11,7 +11,7 @@ class Relayer {
         this.logger = new Logger(loggerOptions).getLogger()
         let verified = Verify.relayerConstructor({port,privateKey,providerAddress})
         if (!verified) {
-            throw('Relayer Constructor') 
+            throw('Relayer Constructor Error') 
         }
 
         console.log('Starting Relayer at port:', port)

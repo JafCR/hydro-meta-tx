@@ -9,12 +9,10 @@ class Logger {
     prefix: string
 
     constructor(options?: Logger.Options) {
-        console.log('Logger options: ', options)
         options = options || <Logger.Options>{}
         this.level = options.level || "info"
         this.directory = options.directory || path.resolve(__dirname, "..")
         this.prefix = options.prefix || ""
-        console.log(this)
     }
 
     getLogger() {
@@ -35,7 +33,6 @@ class Logger {
                 }
             ]
         })
-        console.log('Logger options: ', log)
         return log
     }
 }

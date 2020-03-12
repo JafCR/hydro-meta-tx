@@ -28,13 +28,15 @@ export function relayerConstructor({port,privateKey,providerAddress}: Relayer.Co
 
     if (providerAddress === undefined) {
         result = false
-        logger.fatal(name, "Private key is not defined")
+        logger.fatal(name, "Provider address is not defined")
     }
 
     try {
-        new ethers.providers.InfuraProvider(providerAddress)
+        // new ethers.providers.InfuraProvider(providerAddress)
+        let provider = ethers.getDefaultProvider('ropsten')
+        console.log(provider)
     } catch(e) {
-        logger.fatal('Incorrect provider address: ', providerAddress)
+        logger.fatal('Incorrect provider address: ', providerAddress,e)
 
     }
 

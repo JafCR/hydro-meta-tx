@@ -28,4 +28,4 @@ run_geth() {
 }
 
 run_geth
-sleep 30
+sleep 60

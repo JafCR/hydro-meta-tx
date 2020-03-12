@@ -19,15 +19,14 @@ const SmartWalletABI = [
   'event Paid(address from, address to, address tokenContract, uint value,uint fee)'
 ]
 
-function relayerWallet(privateKey:string) {
-  const provider = new ethers.providers.JsonRpcProvider()
+function relayerWallet(provider:any,privateKey:string) {
   provider.pollingInterval = 500
   return new ethers.Wallet(privateKey, provider)
 }
 
-async function getChainId(privateKey:string) {
+async function getChainId(provider:any, privateKey:string) {
 
-  let rw = relayerWallet(privateKey)
+  let rw = relayerWallet(provider,privateKey)
   let network = await rw.provider.getNetwork()
   return network.chainId
 
@@ -35,8 +34,8 @@ async function getChainId(privateKey:string) {
 
 
 router.get('/relayerAddress', async function(req, res) {
-  let result = {relayer:relayerWallet(req.privateKey).address}
-  loggerRoutes.debug('Response', result)
+  let result = {relayer:relayerWallet(req.provider,req.privateKey).address}
+  req.logger.debug('Response', result)
   res.send(result)
 })
 
@@ -45,18 +44,18 @@ router.post('/deploySend', async function(req, res) {
   let sig = ethers.utils.splitSignature(request.sig)
   let factory = request.factory
 
-  let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet(req.privateKey))
+  let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet(req.provider,req.privateKey))
 
   factoryContract.on('Deployed', async (addr:string, owner:string) => {
     let result = {
       contract: addr,
       owner: owner,
     }
-    loggerRoutes.debug('Response:', result)
+    req.logger.debug('Response:', result)
     res.send(result)
   })
   var tx
-  let _chainId = await getChainId(req.privateKey)
+  let _chainId = await getChainId(req.provider,req.privateKey)
   try {
     tx = await factoryContract.deployWalletPay(
       request.fee,
@@ -73,8 +72,8 @@ router.post('/deploySend', async function(req, res) {
       },
     )
   } catch (e) {
-    loggerRoutes.error(e)
-    loggerRoutes.error(tx)
+    req.logger.error(e)
+    req.logger.error(tx)
   }
 })
 
@@ -86,7 +85,7 @@ router.post('/send', async function(req, res) {
   let smartWalletContract = new ethers.Contract(
     smartWallet,
     SmartWalletABI,
-    relayerWallet(req.privateKey),
+    relayerWallet(req.provider,req.privateKey),
   )
 
   smartWalletContract.on('Paid', (from, to, token, value, fee) => {
@@ -97,11 +96,11 @@ router.post('/send', async function(req, res) {
       value,
       fee,
     }
-    loggerRoutes.debug('Response:', result)
+    req.logger.debug('Response:', result)
     res.send(result)
   })
   var tx
-  let _chainId = await getChainId(req.privateKey)
+  let _chainId = await getChainId(req.provider,req.privateKey)
   try {
     tx = await smartWalletContract.pay(
       request.to,
@@ -118,8 +117,8 @@ router.post('/send', async function(req, res) {
       },
     )
   } catch (e) {
-    loggerRoutes.error(e)
-    loggerRoutes.error(tx)
+    req.logger.error(e)
+    req.logger.error(tx)
   }
 })
 

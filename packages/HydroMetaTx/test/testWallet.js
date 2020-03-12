@@ -10,9 +10,18 @@ const HydroTxAPI = require('../index.js').api
 const Relayer = require('../index.js').relayer
 
 let relayer = new Relayer()
-const RELAYER_PORT = 44444
-const PRIVATEKEY = '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
-var relayerInstance = relayer.start(RELAYER_PORT,PRIVATEKEY)
+const port = 44444
+const pk = '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
+let providerAddress ="http://localhost:8545"
+let infuraNetwork = 'kovan'
+let infuraAccessToken = '22451fcb5a704706b3a6da4a757a1a93'
+const loggerOptions = {
+  prefix:"",
+  directory:"",
+  // level:"debug"
+  level:"info"
+}
+var relayerInstance
 
 chai.use(chaiAsPromised)
 expect = chai.expect
@@ -32,13 +41,16 @@ describe('Test', async function(accounts) {
 
 
   this.timeout(10000)
-  before(async () => {})
+  before(async () => {
+    relayerInstance = await relayer.start({privateKey:pk,providerAddress,port})
+
+  })
 
   it('01. Deploy Hydro-Meta-Tx', async () => {
     hydro = new HydroTxAPI.default({
       factoryAddress: factoryAddress,
       providerAddress:'http://localhost:8545',
-      relayHost: `http://127.0.0.1:${RELAYER_PORT}`
+      relayHost: `http://127.0.0.1:${port}`
     })
     expect(hydro.factoryAddress).to.be.equal(factoryAddress)
   })

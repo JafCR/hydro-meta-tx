@@ -4,7 +4,7 @@ import * as ethers from 'ethers'
 const logger = new Logger().getLogger()
 
 
-export function relayerConstructor({port,privateKey,providerAddress}: Relayer.Constructor): boolean {
+export function relayerConstructor({port,privateKey,providerAddress,infuraNetwork,infuraAccessToken}: Relayer.Constructor): boolean {
 
     let name = "Relayer Constructor"
     let result: boolean = true
@@ -32,9 +32,7 @@ export function relayerConstructor({port,privateKey,providerAddress}: Relayer.Co
     }
 
     try {
-        // new ethers.providers.InfuraProvider(providerAddress)
-        let provider = ethers.getDefaultProvider('ropsten')
-        console.log(provider)
+        new ethers.providers.JsonRpcProvider(providerAddress)
     } catch(e) {
         logger.fatal('Incorrect provider address: ', providerAddress,e)
 
@@ -48,6 +46,7 @@ export function relayerConstructor({port,privateKey,providerAddress}: Relayer.Co
 export function hydroConstructor(request: Hydro.Constructor): boolean {
 
     let name = "Hydro Constructor"
+    console.log('HYdro Constructor options: ', request)
     let result: boolean = true
     if (request.factoryAddress === undefined) {
         result = false

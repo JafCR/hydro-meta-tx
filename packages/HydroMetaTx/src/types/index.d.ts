@@ -32,6 +32,8 @@ declare global {
             factoryAddress: string,
             relayHost: string,
             providerAddress: string
+            infuraNetwork: string
+            infuraAccessToken: string
         }
     }
     namespace Logger {

@@ -36,5 +36,8 @@
     "openzeppelin-solidity": "^2.5.0",
     "sleep": "^6.1.0",
     "truffle": "^5.1.15"
+  },
+  "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.0.32"
   }
 }

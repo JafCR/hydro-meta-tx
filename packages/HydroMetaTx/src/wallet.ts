@@ -42,7 +42,7 @@ export default class Wallet {
 
 
 
-  constructor(opts: Wallet.Constructor) {
+  constructor(opts: Wallet.Constructor,provider:any) {
 
     if(!Verify.walletConstructor(opts)) {
       throw('Invalid Wallet Constructor parameters')
@@ -57,7 +57,7 @@ export default class Wallet {
       baseURL: this.options.relayHost,
       timeout: 30000,
     })
-    this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress)
+    this.provider = provider
     logger.debug(`New Hydro Wallet instance. Factory: ${this.factoryAddress} `)
 
   }

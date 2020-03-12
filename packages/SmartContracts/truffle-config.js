@@ -23,6 +23,14 @@
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
+const HDWalletProvider = require('@truffle/hdwallet-provider')
+const privateKey = '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
+const providers = {
+  main: 'https://mainnet.infura.io/v3/22451fcb5a704706b3a6da4a757a1a93',
+  ropsten: 'https://ropsten.infura.io/v3/22451fcb5a704706b3a6da4a757a1a93',
+  kovan: 'https://kovan.infura.io/v3/22451fcb5a704706b3a6da4a757a1a93',
+  rinkeby: 'https://rinkeby.infura.io/v3/22451fcb5a704706b3a6da4a757a1a93',
+}
 
 module.exports = {
   /**
@@ -42,6 +50,7 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
+    
     development: {
       host: '127.0.0.1', // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
@@ -49,7 +58,19 @@ module.exports = {
       // gas: 579105,
       gas: 6000000,
     },
-
+    developmentPK: {
+      provider: () => new HDWalletProvider(privateKey, 'http://localhost:8545'),
+      network_id: '*', // Any network (default: none),
+      // gas: 579105,
+      gas: 6000000,
+      gasPrice: 5000000000,
+    },
+    kovan: {
+      // must be a thunk, otherwise truffle commands may hang in CI
+      provider: () => new HDWalletProvider(privateKey, providers.kovan),
+      network_id: '42',
+      gasPrice: 5000000000,
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

@@ -12,7 +12,7 @@ export default class MetaTx {
   options: any = {}
 
   wallet: Wallet | undefined
-  provider: ethers.providers.JsonRpcProvider
+  provider: any
   relayAPI: AxiosInstance
 
   constructor(opts: Hydro.Constructor) {
@@ -24,10 +24,22 @@ export default class MetaTx {
       baseURL: this.options.relayHost,
       timeout: 30000,
     })
-    this.provider = new ethers.providers.JsonRpcProvider(this.options.providerAddress!)
     logger.debug('New Hydro-Meta-Tx instance,', this.options)
   }
 
+  async getProvider({providerAddress,infuraNetwork,infuraAccessToken}):Promise<any> {
+    var provider:any 
+    if(infuraNetwork) {
+        provider = new ethers.providers.InfuraProvider(infuraNetwork,infuraAccessToken)
+    }
+    else {
+        provider = new ethers.providers.JsonRpcProvider(providerAddress)
+    }
+    
+    let network = await provider.getNetwork()
+    console.log('Network: ', network)
+    return provider
+}
   get factoryAddress() {
     return this.options.factoryAddress
   }
@@ -60,9 +72,10 @@ export default class MetaTx {
   async createSmartWallet(password: string) {
     await this.verifyFactory()
 
+    this.provider = await this.getProvider({providerAddress:this.options.providerAddress,infuraNetwork:this.options.infuraNetwork,infuraAccessToken:this.options.infuraAccessToken})
     var account = ethers.Wallet.createRandom()
     var keystore = await account.encrypt(password)
-    var smartWallet = new Wallet(this.options)
+    var smartWallet = new Wallet(this.options,this.provider)
     let result = {
       keystore,
       smartWallet,
@@ -74,16 +87,18 @@ export default class MetaTx {
   }
 
   async importKeyStore(keystore: string, password: string) {
+    this.provider = await this.getProvider({providerAddress:this.options.providerAddress,infuraNetwork:this.options.infuraNetwork,infuraAccessToken:this.options.infuraAccessToken})
     await this.verifyFactory()
-    var smartWallet = new Wallet(this.options)
+    var smartWallet = new Wallet(this.options,this.provider)
     await smartWallet.initKeyStore(keystore, password)
     logger.debug('importKeyStore: ', { smartwallet: smartWallet.address, signer: smartWallet.signer })
     return smartWallet
   }
 
   async importPrivateKey(privateKey: string) {
+    this.provider = await this.getProvider({providerAddress:this.options.providerAddress,infuraNetwork:this.options.infuraNetwork,infuraAccessToken:this.options.infuraAccessToken})
     await this.verifyFactory()
-    var smartWallet = new Wallet(this.options)
+    var smartWallet = new Wallet(this.options,this.provider)
     await smartWallet.initPrivateKey(privateKey)
     logger.debug('improtPrivateKey: ', { smartwallet: smartWallet.address, signer: smartWallet.signer })
     return smartWallet

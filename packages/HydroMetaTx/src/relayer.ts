@@ -7,11 +7,11 @@ import * as Verify from './verify.js'
 class Relayer {
 
     logger:any
-    start({port,privateKey}:Relayer.Constructor,loggerOptions:Logger.Options):Express.Application {
+    start({port,privateKey,providerAddress}:Relayer.Constructor,loggerOptions:Logger.Options):Express.Application {
         this.logger = new Logger(loggerOptions).getLogger()
-        let verified = Verify.relayerConstructor({port,privateKey})
+        let verified = Verify.relayerConstructor({port,privateKey,providerAddress})
         if (!verified) {
-            throw('Relayer Constructor: Private Key not defined. Error.') 
+            throw('Relayer Constructor') 
         }
 
         console.log('Starting Relayer at port:', port)

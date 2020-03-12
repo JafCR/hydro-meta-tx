@@ -13,8 +13,9 @@ declare global {
 
     namespace Relayer {
         interface Constructor {
-            port:number,
-            privateKey:string
+            port: number,
+            privateKey: string,
+            providerAddress: string
         }
     }
     namespace Wallet {
@@ -34,7 +35,7 @@ declare global {
     namespace Logger {
         interface Options {
             directory: string,
-            level: string, 
+            level: string,
             prefix: string
         }
     }

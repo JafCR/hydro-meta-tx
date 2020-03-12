@@ -4,29 +4,42 @@ import * as ethers from 'ethers'
 const logger = new Logger().getLogger()
 
 
-export function relayerConstructor(request: Relayer.Constructor): boolean {
+export function relayerConstructor({port,privateKey,providerAddress}: Relayer.Constructor): boolean {
 
     let name = "Relayer Constructor"
     let result: boolean = true
-    if (request.port === undefined || request.port <= 0) {
+    if (port === undefined || port <= 0) {
         result = false
-        logger.error(name, "Port is not defined or is wrong. Port: ", request.port)
+        logger.fatal(name, "Port is not defined or is wrong. Port: ", port)
     }
 
-    if (request.privateKey === undefined) {
+    if (privateKey === undefined) {
         result = false
-        logger.error(name, "Private key is not defined")
+        logger.fatal(name, "Private key is not defined")
     }
-
+    
     try{
-        new ethers.Wallet(request.privateKey)
+        new ethers.Wallet(privateKey)
     }
     catch (e) {
         result = false
         logger.fatal(name, "Invalid private key", e)
     }
 
-    return result
+    if (providerAddress === undefined) {
+        result = false
+        logger.fatal(name, "Private key is not defined")
+    }
+
+    try {
+        new ethers.providers.InfuraProvider(providerAddress)
+    } catch(e) {
+        logger.fatal('Incorrect provider address: ', providerAddress)
+
+    }
+
+
+    return  result
 }
 
 

@@ -21,12 +21,6 @@ const TOKEN_ADDRESS = '0xF2cd21Db077Abbc3e6B503d978c828c7c012728a'
 // const FACTORY_ADDRESS = '0x29FB6831a3519230AEB915Ff3fE6c48C789D9275'
 // const TOKEN_ADDRESS = '0xA2986675d38673c58993EE63741093dC389c1534'
 
-function msleep(n) {
-    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
-  }
-  function sleep(n) {
-    msleep(n*1000);
-  }
 
 const tokenABI = [
     "function mint(address account, uint256 amount) public returns (bool)",
@@ -50,9 +44,6 @@ async function RunTest() {
 
     // Create provide to use for out-of meta-tx actions.
        const provider = new ethers.providers.InfuraProvider(INFURA_NETWORK,INFURA_TOKEN)
-       console.log('Let\'s wait a bit so provider can initializie')
-       provider.polling = 100
-       sleep(1)
     // const provider = new ethers.providers.JsonRpcProvider(PROVIDER_ADDRESS)
 
     // Create ethers owner Wallet. Owner must be the same account which was used by truffle framework to deploy contracts

@@ -1,24 +1,28 @@
 const express = require('express')
 const routes = require('./routes.js')
 const bodyParser = require('body-parser')
-const logger = require('./logger.js')
+const Logger = require('./logger.js')
+
+import * as Verify from './verify.js'
 class Relayer {
 
-    start(port,privateKey) {
-
-        if(privateKey === undefined) {
-            console.log('Private Key not defined. Error.')    
-            return null
+    logger:any
+    start({port,privateKey}:Relayer.Constructor,loggerOptions:Logger.Options):Express.Application {
+        this.logger = new Logger(loggerOptions).getLogger()
+        let verified = Verify.relayerConstructor({port,privateKey})
+        if (!verified) {
+            throw('Relayer Constructor: Private Key not defined. Error.') 
         }
+
         console.log('Starting Relayer at port:', port)
         const app = express()
         app.use(bodyParser.urlencoded({ extended: true }))
         app.use(bodyParser.json())
         app.all('*',(req,res,next)=>{
-            logger.info(`NEW REQUEST ${req.method} ${req.originalUrl}`)
-            logger.debug(`PARAMS: ${JSON.stringify(req.params)}`)
+            this.logger.info(`NEW REQUEST ${req.method} ${req.originalUrl}`)
+            this.logger.debug(`PARAMS: ${JSON.stringify(req.params)}`)
+            this.logger.debug(`BODY: ${JSON.stringify(req.body)}`)
             req.privateKey = privateKey
-            req.logger = logger
             req.next()
 
         })

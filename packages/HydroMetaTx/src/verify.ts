@@ -1,9 +1,36 @@
 
-const logger = require('./logger.js')
+const Logger = require('./logger.js')
 import * as ethers from 'ethers'
+const logger = new Logger().getLogger()
 
 
-export function hydroConstructor(request:Hydro.Constructor): boolean {
+export function relayerConstructor(request: Relayer.Constructor): boolean {
+
+    let name = "Relayer Constructor"
+    let result: boolean = true
+    if (request.port === undefined || request.port <= 0) {
+        result = false
+        logger.error(name, "Port is not defined or is wrong. Port: ", request.port)
+    }
+
+    if (request.privateKey === undefined) {
+        result = false
+        logger.error(name, "Private key is not defined")
+    }
+
+    try{
+        new ethers.Wallet(request.privateKey)
+    }
+    catch (e) {
+        result = false
+        logger.fatal(name, "Invalid private key", e)
+    }
+
+    return result
+}
+
+
+export function hydroConstructor(request: Hydro.Constructor): boolean {
 
     let name = "Hydro Constructor"
     let result: boolean = true

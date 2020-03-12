@@ -1,9 +1,10 @@
 import * as ethers from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import BigNumber from 'bignumber.js'
-const logger = require('./logger.js')
+const Logger = require('./logger.js')
 import * as Verify from './verify.js'
 
+const logger = new Logger().getLogger()
 
 ethers.errors.setLogLevel('error')
 
@@ -46,7 +47,9 @@ export default class Wallet {
     if(!Verify.walletConstructor(opts)) {
       throw('Invalid Wallet Constructor parameters')
     }
+
     this.options = opts
+
       // typeof _keystore === 'string' ? JSON.parse(_keystore) : _keystore
     // this.provider = ethers.getDefaultProvider(this.options.provider)
     this.factoryAddress = this.options.factoryAddress

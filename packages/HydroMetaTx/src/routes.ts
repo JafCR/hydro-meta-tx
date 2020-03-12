@@ -1,7 +1,9 @@
 const exp = require('express')
 const router = exp.Router()
-const loggerRoutes = require('./logger.js')
+const LoggerR = require('./logger.js')
 const ethers = require('ethers')
+
+const loggerRoutes = new LoggerR().getLogger()
 
 const factoryAbi = [
   'function deployWalletPay(uint fee, address token, address to, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s)  public returns (address addr)',
@@ -18,20 +20,9 @@ const SmartWalletABI = [
 ]
 
 function relayerWallet(privateKey:string) {
-
-  if(!privateKey) {
-    logger.error('Private key was not provided: ', privateKey )
-  }
   const provider = new ethers.providers.JsonRpcProvider()
   provider.pollingInterval = 500
-  try {
-    return new ethers.Wallet(privateKey, provider)
-  }
-  catch(e) {
-    logger.error('Private key is incorrect: ', privateKey, e)
-    return null
-  }
-
+  return new ethers.Wallet(privateKey, provider)
 }
 
 async function getChainId(privateKey:string) {

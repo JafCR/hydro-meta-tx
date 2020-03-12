@@ -10,6 +10,13 @@ declare global {
             gasprice: string
         }
     }
+
+    namespace Relayer {
+        interface Constructor {
+            port:number,
+            privateKey:string
+        }
+    }
     namespace Wallet {
         interface Constructor {
             factoryAddress: string,
@@ -17,12 +24,18 @@ declare global {
             providerAddress: string
         }
     }
-
     namespace Hydro {
         interface Constructor {
             factoryAddress: string,
             relayHost: string,
             providerAddress: string
+        }
+    }
+    namespace Logger {
+        interface Options {
+            directory: string,
+            level: string, 
+            prefix: string
         }
     }
 }

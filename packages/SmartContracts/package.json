@@ -10,7 +10,7 @@
     "test": "truffle test test/1_FactoryDeploy.js",
     "geth": "geth --dev js ./test/geth_script.js",
     "build": "truffle compile",
-    "relayer": "nodemon -w ../HydroMetaTx/lib scripts/startRelayer.js|bunyan "
+    "relayer": "nodemon -w ../HydroMetaTx/lib -w ./scripts scripts/startRelayer.js|bunyan "
   },
   "repository": {
     "type": "git",

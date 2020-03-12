@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "echo No test",
     "testWallet": "mocha test/testWallet.js",
-    "version": "tsc -v"
+    "version": "tsc -v"    
   },
   "repository": {
     "type": "git",

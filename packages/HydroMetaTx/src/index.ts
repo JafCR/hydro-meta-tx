@@ -1,8 +1,10 @@
 import axios, { AxiosInstance } from 'axios'
 import * as ethers from 'ethers'
 import Wallet from './wallet'
-const logger = require('./logger.js')
+const Logger = require('./logger.js')
 import * as Verify from './verify.js'
+
+const logger = new Logger().getLogger()
 
 ethers.errors.setLogLevel('error')
 

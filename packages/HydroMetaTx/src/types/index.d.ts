@@ -15,7 +15,9 @@ declare global {
         interface Constructor {
             port: number,
             privateKey: string,
-            providerAddress: string
+            providerAddress: string,
+            infuraNetwork: string,
+            infuraAccessToken: string
         }
     }
     namespace Wallet {

@@ -1,6 +1,6 @@
 {
   "name": "hydro-meta-tx",
-  "version": "0.0.5",
+  "version": "0.1.1",
   "description": "Hydro Meta Transactions",
   "main": "index.js",
   "scripts": {

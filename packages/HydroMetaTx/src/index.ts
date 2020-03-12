@@ -37,7 +37,6 @@ export default class MetaTx {
     }
     
     let network = await provider.getNetwork()
-    console.log('Network: ', network)
     return provider
 }
   get factoryAddress() {
@@ -108,7 +107,6 @@ export default class MetaTx {
     keystore: string,
     password: string,
   ): Promise<ethers.Wallet> {
-    await this.verifyFactory()
     return await ethers.Wallet.fromEncryptedJson(keystore, password)
   }
 
@@ -120,7 +118,6 @@ export default class MetaTx {
       keystore,
       account
     }
-    await this.verifyFactory()
     return result
   }
 

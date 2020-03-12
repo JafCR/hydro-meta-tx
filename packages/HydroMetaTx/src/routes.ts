@@ -20,7 +20,7 @@ const SmartWalletABI = [
 ]
 
 function relayerWallet(provider:any,privateKey:string) {
-  provider.pollingInterval = 500
+  // provider.pollingInterval = 500
   return new ethers.Wallet(privateKey, provider)
 }
 
@@ -46,12 +46,13 @@ router.post('/deploySend', async function(req, res) {
 
   let factoryContract = new ethers.Contract(factory, factoryAbi, relayerWallet(req.provider,req.privateKey))
 
-  factoryContract.on('Deployed', async (addr:string, owner:string) => {
+  factoryContract.once('Deployed', async (addr:string, owner:string) => {
     let result = {
       contract: addr,
       owner: owner,
     }
     req.logger.debug('Response:', result)
+    factoryContract.removeAllListeners('Deployed')
     res.send(result)
   })
   var tx
@@ -87,8 +88,7 @@ router.post('/send', async function(req, res) {
     SmartWalletABI,
     relayerWallet(req.provider,req.privateKey),
   )
-
-  smartWalletContract.on('Paid', (from, to, token, value, fee) => {
+  smartWalletContract.once('Paid', (from, to, token, value, fee) => {
     let result = {
       from,
       to,
@@ -97,6 +97,7 @@ router.post('/send', async function(req, res) {
       fee,
     }
     req.logger.debug('Response:', result)
+    smartWalletContract.removeAllListeners("Paid")
     res.send(result)
   })
   var tx

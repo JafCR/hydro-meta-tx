@@ -46,7 +46,6 @@ export function relayerConstructor({port,privateKey,providerAddress,infuraNetwor
 export function hydroConstructor(request: Hydro.Constructor): boolean {
 
     let name = "Hydro Constructor"
-    console.log('HYdro Constructor options: ', request)
     let result: boolean = true
     if (request.factoryAddress === undefined) {
         result = false

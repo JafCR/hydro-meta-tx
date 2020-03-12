@@ -55,7 +55,7 @@ export default class Wallet {
     this.factoryAddress = this.options.factoryAddress
     this.relayAPI = axios.create({
       baseURL: this.options.relayHost,
-      timeout: 30000,
+      timeout: 300000,
     })
     this.provider = provider
     logger.debug(`New Hydro Wallet instance. Factory: ${this.factoryAddress} `)

@@ -69,12 +69,10 @@ contract('Deployment Test', async accounts => {
     hydroOptions.factoryAddress = factoryInstance.address
     hydro = new HydroTxAPI.default(hydroOptions)
     expect(hydro).to.be.not.undefined
-
     walletRelayer = await hydro.importAccount(
       keyString.toString(),
       'test test test',
-    )
-
+      )
     await rrInstance.triggerRelay(walletRelayer.address, true)
     let accepted = await rrInstance.relays(walletRelayer.address)
     expect(accepted).to.be.true

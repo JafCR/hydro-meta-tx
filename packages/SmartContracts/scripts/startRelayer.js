@@ -14,7 +14,8 @@ const loggerOptions = {
 
 async function StartProvider() {
 
-    await relayer.start({port,privateKey,providerAddress,infuraNetwork,infuraAccessToken}, loggerOptions)
+    // await relayer.start({port,privateKey,providerAddress,infuraNetwork,infuraAccessToken}, loggerOptions)
+    await relayer.start({port,privateKey,providerAddress}, loggerOptions)
     // await relayer.start({port,privateKey,providerAddress}, loggerOptions)
 }
 

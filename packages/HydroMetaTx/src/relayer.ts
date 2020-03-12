@@ -8,6 +8,8 @@ import { ethers } from 'ethers'
 class Relayer {
 
     logger:any
+    listener:any
+    provider:any
 
     async getProvider({providerAddress,infuraNetwork,infuraAccessToken}):Promise<any> {
         var provider:any 
@@ -21,7 +23,6 @@ class Relayer {
         }
         
         let network = await provider.getNetwork()
-        console.log('Network: ', network)
         return provider
     }
 
@@ -31,7 +32,7 @@ class Relayer {
         if (!verified) {
             throw('Relayer Constructor Error') 
         }
-        var provider = await this.getProvider({providerAddress,infuraNetwork,infuraAccessToken})
+        this.provider = await this.getProvider({providerAddress,infuraNetwork,infuraAccessToken})
 
         console.log('Starting Relayer at port:', port)
         const app = express()
@@ -41,7 +42,7 @@ class Relayer {
             this.logger.info(`NEW REQUEST ${req.method} ${req.originalUrl}`)
             this.logger.debug(`PARAMS: ${JSON.stringify(req.params)}`)
             this.logger.debug(`BODY: ${JSON.stringify(req.body)}`)
-            req.provider = provider
+            req.provider = this.provider
             req.privateKey = privateKey
             req.logger = this.logger
             req.next()
@@ -49,8 +50,13 @@ class Relayer {
         })
         // app.use(bodyParser.raw())
         app.use(routes)
-        return app.listen(port)
+        this.listener = app.listen(port)
+        return this.listener
+    }
 
+    async stop() {
+        this.provider.polling = false
+        this.listener.close()
     }
 }
 

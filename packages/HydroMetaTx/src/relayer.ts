@@ -30,6 +30,7 @@ class Relayer {
         this.logger = new Logger(loggerOptions).getLogger()
         let verified = Verify.relayerConstructor({port,privateKey,providerAddress,infuraNetwork,infuraAccessToken})
         if (!verified) {
+            console.log('Constructor')
             throw('Relayer Constructor Error') 
         }
         this.provider = await this.getProvider({providerAddress,infuraNetwork,infuraAccessToken})

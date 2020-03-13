@@ -24,4 +24,4 @@ docker -D run \
     --miner.etherbase 0xdc5ceee4a36133a4b31285675545cd230b09a5c4 \
     js ./geth/geth_script.js &
 
-    sleep 60
+    sleep 500

@@ -9,8 +9,7 @@ const Contract = ethers.Contract
 const HydroTxAPI = require('../index.js').api
 const Relayer = require('../index.js').relayer
 
-let relayer = new Relayer()
-const port = 44444
+const port = 4444
 const pk = '0x52cc5ff4d4278a74fd5b1405ef9d52a5ef9a7e215973b13f466267870c67287b'
 let providerAddress ="http://localhost:8545"
 let infuraNetwork = 'kovan'
@@ -30,19 +29,24 @@ var privateKey
 var signer
 var swaddress
 var swKeystore
+var relayer
 
 var factoryAddress = '0x68e7FAFC6fFe9151D87122dB0dA1cF67902406A0'
 
 describe('Test', async function(accounts) {
 
+  this.timeout(10000)
+
   after(()=>{
-    relayerInstance.close()
+    relayer.stop()
   })
 
-
-  this.timeout(10000)
   before(async () => {
-    relayerInstance = await relayer.start({privateKey:pk,providerAddress,port})
+  relayer = new Relayer()
+  console.log(relayer)
+  console.log(Relayer)
+  let instance = await relayer.start({privateKey:pk,providerAddress,port:port},{})
+  // console.log(instance)
 
   })
 

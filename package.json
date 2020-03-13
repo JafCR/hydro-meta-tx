@@ -6,7 +6,7 @@
     "why-is-node-running": "^2.1.2"
   },
   "scripts": {
-    "ci": "./scripts/ci.sh"
+    "ci": "./geth/start_geth.sh"
   },
   "dependencies": {
     "ethers": "^4.0.45",

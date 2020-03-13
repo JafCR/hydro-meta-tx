@@ -15,7 +15,14 @@ docker -D run \
     -p 30303:30303 \
     ethereum/client-go:v1.9.11 \
     --allow-insecure-unlock \
-    --rpc --datadir ./geth/geth_datadir/ \
+    --rpc \
+    --rpcaddr '0.0.0.0' \
+    --rpcport 8545 \
+    --rpccorsdomain '*' \
+    --ws \
+    --wsaddr '0.0.0.0' \
+    --wsorigins '*' \
+    --datadir ./geth/geth_datadir/ \
     --rpcapi "eth,net,web3,admin,personal,miner" \
     --nodiscover \
     --miner.gastarget 8000000 \
@@ -24,4 +31,4 @@ docker -D run \
     --miner.etherbase 0xdc5ceee4a36133a4b31285675545cd230b09a5c4 \
     js ./geth/geth_script.js &
 
-    sleep 500
+    sleep 60
